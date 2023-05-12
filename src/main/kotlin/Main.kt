@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.ZoneOffset
 import kotlin.time.ExperimentalTime
-import kotlin.time.measureTimedValue
 
 private val logger = LoggerFactory.getLogger("Main")
 
@@ -30,12 +29,6 @@ fun main() {
     GlobalScope.async {
         val devden = jda.getGuildById(SERVER_ID)!!
 
-
-        // index all messages
-        logger.info("Starting indexing")
-        val (index, time) = measureTimedValue { getAllMessages(devden, lastYear) }
-
-        logger.info("indexing done in $time")
         val staffUsers = devden.findMembersWithRoles(devden.getRoleById(STAFF_ROLE_ID)!!)
             .await()
             .map { it.user }
