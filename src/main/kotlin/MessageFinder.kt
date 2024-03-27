@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalTime::class)
-
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.toList
@@ -47,12 +44,14 @@ suspend fun getThreads(
 }
 
 
+
 suspend fun getAllMessages(
     entity: MessageChannel,
     since: Instant,
     filter: (Message) -> Boolean = { true }
-): List<Message> = cache.getOrPut(entity.idLong) {
-    coroutineScope {
+): Stream<Message> = cache[entity.idLong]?.parallelStream() ?: run {
+
+    val x = coroutineScope {
         val (all, time) = measureTimedValue {
             logger.info("Fetching messages for ${entity.name}")
 
@@ -70,7 +69,7 @@ suspend fun getAllMessages(
                     .flatMap {
                         runBlocking {
                             getAllMessages(it, since, filter)
-                        }.stream()
+                        }
                     }
                 else Stream.of()
             }
@@ -82,6 +81,8 @@ suspend fun getAllMessages(
         logger.info("Found ${all.size} matching messages for ${entity.name} in $time")
         all
     }
+    cache[entity.idLong] = x
+    x.parallelStream()
 }
 
 @OptIn(FlowPreview::class)
@@ -95,7 +96,7 @@ suspend fun getAllMessages(guild: Guild, until: Instant, filter: (Message) -> Bo
         .filter { c -> c.parentCategoryIdLong !in SKIP_CATEGORIES }
         .mapParallel(scope) {
             getAllMessages(it, until, filter)
-                .asFlow()
+                .consumeAsFlow()
         }
         .flattenConcat()
 
