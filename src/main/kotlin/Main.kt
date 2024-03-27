@@ -1,4 +1,7 @@
-import kotlinx.coroutines.*
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
@@ -10,8 +13,8 @@ import kotlin.time.ExperimentalTime
 
 private val logger = LoggerFactory.getLogger("Main")
 
-@OptIn(DelicateCoroutinesApi::class)
-@ExperimentalTime
+
+
 fun main() {
     println("Enter token")
     val token = readln()
@@ -22,7 +25,7 @@ fun main() {
     jda.awaitReady()
 
     val lastYear = LocalDate
-        .of(2021, 12, 31)
+        .of(2022, 12, 31)
         .atTime(23, 59, 59)
         .toInstant(ZoneOffset.UTC)
 
@@ -34,6 +37,8 @@ fun main() {
             .map { it.user }
             .toSet()
         logger.info("Staff: {}", staffUsers.map { it.name })
+
+        val index = getAllMessages(devden, lastYear)
 
         val intros = async {
             getAllMessages(
@@ -50,18 +55,18 @@ fun main() {
         }
 
         val showcaseReactions = async {
-            val showcases = getAllMessages(
-                devden.getChannelById(TextChannel::class.java, 847936633964724254)!!,
+            val showcases = getThreads(
+                devden.getChannelById(ForumChannel::class.java, 1115235973622661150)!!,
                 lastYear
             )
-            showcases.size to showcases.sumOf { it.reactions.size }
+            showcases.size to showcases.sumOf { it.retrieveStartMessage().await().reactions.size }
         }
 
         val starboardReactions = async {
             getAllMessages(
                 devden.getChannelById(TextChannel::class.java, 975786395211816980)!!,
                 lastYear
-            ).sumOf { it.reactions.size }
+            ).mapToInt { it.reactions.size }.sum()
         }
 
         val notAllowedEmojis = async {
@@ -94,7 +99,7 @@ fun main() {
 
         logger.info(
             """
-            Found ${intros.await().size} intros
+            Found ${intros.await().count()} intros
             Found ${staffMentions.await().size} staff mentions
             Found ${index.size} overall messages
             Found ${showcaseReactions.await().second} showcase reactions across ${showcaseReactions.await().first} messages
