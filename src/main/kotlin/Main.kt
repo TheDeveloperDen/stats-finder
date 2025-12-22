@@ -1,4 +1,3 @@
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -9,10 +8,8 @@ import net.dv8tion.jda.api.requests.GatewayIntent
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.time.ZoneOffset
-import kotlin.time.ExperimentalTime
 
 private val logger = LoggerFactory.getLogger("Main")
-
 
 
 fun main() {
