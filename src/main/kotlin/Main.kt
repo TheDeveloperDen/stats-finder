@@ -26,7 +26,7 @@ fun main() {
         .atTime(23, 59, 59)
         .toInstant(ZoneOffset.UTC)
 
-    GlobalScope.async {
+    runBlocking {
         val devden = jda.getGuildById(SERVER_ID)!!
 
         val staffUsers = devden.findMembersWithRoles(devden.getRoleById(STAFF_ROLE_ID)!!)
@@ -105,10 +105,6 @@ fun main() {
             Found ${forumPosts.await()} forum posts
             """.trimIndent()
         )
-    }.let {
-        runBlocking {
-            it.await()
-        }
     }
 
 
