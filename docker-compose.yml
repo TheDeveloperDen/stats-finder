@@ -1,0 +1,7 @@
+services:
+  web:
+    image: "hello-world:latest"
+    ports:
+      - "8000:5000"
+  redis:
+    image: "redis:alpine"
