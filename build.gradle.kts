@@ -19,7 +19,7 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:6.2.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.6.4")
 
